@@ -1,11 +1,11 @@
-# Project 24 — Multimodal DeepEval Framework (Text + Voice + Video)
+# Multimodal DeepEval Framework (Text + Voice + Video)
 
-Extends Project 23's DeepEval framework so you can evaluate a **live
+A comprehensive evaluation framework to test and benchmark a **live
 chatbot's text, voice, AND video** capabilities — either the bundled demo
 chatbot, or **your own live chatbot**, via a config file (no code changes).
 
 ```
-Project_24_Multimodal_DeepEval_Framework/
+Multimodal_DeepEval_Framework/
 ├── demo_chatbot/        Subsystem D — a real multimodal app under test
 │   ├── app.py             FastAPI: /chat/text, /chat/voice, /chat/video
 │   ├── llm.py / stt.py / tts.py / vision.py

@@ -1,4 +1,4 @@
-# 📝 Project 01: Local Test Case Generator
+# 📝 Local Test Case Generator
 
 > **AI-powered test case generation from User Stories & PRDs running 100% locally with Ollama (Llama 3.2) and the B.L.A.S.T. Protocol.**
 
@@ -67,7 +67,7 @@ Open `http://localhost:3000` in your web browser.
 ## 📁 Project Structure
 
 ```
-Project_01_LocalTestCaseGenerator/
+LocalTestCaseGenerator/
 ├── architecture/          # Architecture blueprints & flow designs
 ├── frontend/
 │   ├── app.js             # Client-side LLM orchestration & UI state

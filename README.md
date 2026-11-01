@@ -1,17 +1,17 @@
-# 🤖 AI Tester Blueprint — Hands-On Projects Suite
+# 🤖 AI Test Automation & Quality Engineering Suite
 
 <div align="center">
 
-[![AI Tester Blueprint](https://img.shields.io/badge/AI_Tester_Blueprint-Project_Suite-blueviolet?style=for-the-badge&logo=robot)](#)
+[![AI Testing Suite](https://img.shields.io/badge/AI_Testing-Project_Suite-blueviolet?style=for-the-badge&logo=robot)](#)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![DeepEval](https://img.shields.io/badge/DeepEval-LLM_Evaluation-10B981?style=for-the-badge)](https://confident-ai.com)
 [![LangFlow](https://img.shields.io/badge/LangFlow-Visual_RAG-7C3AED?style=for-the-badge)](https://langflow.org)
 [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-black?style=for-the-badge&logo=ollama)](https://ollama.com)
 
-**A comprehensive repository of production-ready, hands-on projects for AI-powered Quality Engineering, Autonomous Agents, and LLM Evaluation.**
+**A comprehensive repository of production-ready, hands-on implementations for AI-powered Quality Engineering, Autonomous Agents, and LLM Evaluation.**
 
-*Developed as part of the AI Tester Blueprint curriculum, focusing on local-first LLM orchestration, privacy-preserving test generators, advanced RAG architectures, and multimodal evaluation frameworks.*
+*Focusing on local-first LLM orchestration, privacy-preserving test generators, advanced RAG architectures, and multimodal evaluation frameworks.*
 
 ---
 
@@ -23,28 +23,28 @@
 
 ## 📚 Projects Catalog
 
-| # | Project Name | Primary Focus | Tech Stack | Highlights |
-|---|---|---|---|---|
-| **01** | [**Project 01: Local Test Case Generator**](./Project_01_LocalTestCaseGenerator) | Local LLM Test Generation | Python, Ollama, Llama 3.2, Vanilla JS | 100% private execution, B.L.A.S.T prompt protocol, streaming output |
-| **02** | [**Project 02: AI Test Crafter (Premium)**](./Project_02_TestCaseGenerator_Premium) | Full-Stack Test Generator | FastAPI, HTML5/CSS, Llama 3.2, Marked.js | Glassmorphism UI, modular API structure, markdown export |
-| **13** | [**Project 13: Advanced RAG with LangFlow**](./Project_13_Advanced_RAG_LangFlow) | Retrieval-Augmented Generation | LangFlow, n8n, ChromaDB, Cohere Rerank | Pre/post-retrieval optimization, semantic chunking, flow JSONs |
-| **17** | [**Project 17: Python AI Foundations**](./Project_17_Python_AI) | Multi-Agent Foundations | Python 3.10+, CrewAI, LangChain | Role-based agent configuration, tool calling, execution loops |
-| **24** | [**Project 24: Multimodal DeepEval Framework**](./Project_24_Multimodal_DeepEval_Framework) | Multimodal LLM Evaluation | DeepEval, Pytest, FastAPI, Groq/OpenAI | Evaluates Text + Voice + Video chatbots with 10 automated quality gates |
+| Project Name | Primary Focus | Tech Stack | Highlights |
+|---|---|---|---|
+| [**Local Test Case Generator**](./LocalTestCaseGenerator) | Local LLM Test Generation | Python, Ollama, Llama 3.2, Vanilla JS | 100% private execution, B.L.A.S.T prompt protocol, streaming output |
+| [**AI Test Crafter (Premium)**](./TestCaseGenerator_Premium) | Full-Stack Test Generator | FastAPI, HTML5/CSS, Llama 3.2, Marked.js | Glassmorphism UI, modular API structure, markdown export |
+| [**Advanced RAG with LangFlow & n8n**](./Advanced_RAG_LangFlow) | Retrieval-Augmented Generation | LangFlow, n8n, ChromaDB, Cohere Rerank | Pre/post-retrieval optimization, semantic chunking, flow JSONs |
+| [**Python AI Foundations**](./Python_AI) | Multi-Agent Foundations | Python 3.10+, CrewAI, LangChain | Role-based agent configuration, tool calling, execution loops |
+| [**Multimodal DeepEval Framework**](./Multimodal_DeepEval_Framework) | Multimodal LLM Evaluation | DeepEval, Pytest, FastAPI, Groq/OpenAI | Evaluates Text + Voice + Video chatbots with 10 automated quality gates |
 
 ---
 
-## 🌟 Deep Dives into Core Projects
+## 🌟 Deep Dives into Core Implementations
 
-### 🔹 1. Local Test Case Generator (`Project_01_LocalTestCaseGenerator`)
+### 🔹 Local Test Case Generator (`LocalTestCaseGenerator`)
 - **Objective**: Generate exhaustive, structured functional & edge test cases from User Stories and PRDs.
 - **Privacy First**: Uses local inference via Ollama (`llama3.2`) — zero data leaves the infrastructure.
 - **B.L.A.S.T Protocol**: Enforces context constraints, input bounds, and negative scenarios.
 
-### 🔹 2. AI Test Crafter — Premium (`Project_02_TestCaseGenerator_Premium`)
+### 🔹 AI Test Crafter — Premium (`TestCaseGenerator_Premium`)
 - **Objective**: Production-grade test generation interface featuring modern glassmorphism aesthetics.
 - **Architecture**: Decoupled FastAPI backend routing AI queries to local LLMs with Markdown parsing and real-time responsiveness.
 
-### 🔹 3. Advanced RAG with LangFlow & n8n (`Project_13_Advanced_RAG_LangFlow`)
+### 🔹 Advanced RAG with LangFlow & n8n (`Advanced_RAG_LangFlow`)
 - **Objective**: Production-grade Retrieval-Augmented Generation with pre-retrieval and post-retrieval optimization layers.
 - **Key Techniques**:
   - Semantic Text Splitting with percentile breakpoint thresholds.
@@ -52,7 +52,7 @@
   - Post-retrieval re-ranking via **Cohere Rerank** to compress top $n=4$ high-relevance chunks.
   - Complete importable flow definitions for both **LangFlow** and **n8n**.
 
-### 🔹 4. Multimodal DeepEval Testing Framework (`Project_24_Multimodal_DeepEval_Framework`)
+### 🔹 Multimodal DeepEval Testing Framework (`Multimodal_DeepEval_Framework`)
 - **Objective**: End-to-end automated testing for AI chatbots across **Text**, **Voice**, and **Video**.
 - **Architecture**:
   - **Native Mode**: For chatbots with native audio/video endpoints.
@@ -95,12 +95,12 @@ git clone https://github.com/pramods7/AIProjects.git
 cd AIProjects
 
 # Example: Navigate to Local Test Case Generator
-cd Project_01_LocalTestCaseGenerator/frontend
+cd LocalTestCaseGenerator/frontend
 node server.js
 ```
 
 ---
 
 <div align="center">
-  <sub>Maintained by <a href="https://github.com/pramods7">Pramod</a> • AI QA Automation Architect</sub>
+  <sub>Maintained by <a href="https://github.com/pramods7">Pramod S.</a> • AI QA Automation Architect</sub>
 </div>

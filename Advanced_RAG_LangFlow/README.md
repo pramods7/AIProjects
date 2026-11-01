@@ -1,4 +1,4 @@
-# 3. Advanced RAG — LangFlow & n8n Implementation
+# Advanced RAG — LangFlow & n8n Implementation
 
 ## Overview
 

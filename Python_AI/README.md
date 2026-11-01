@@ -1,4 +1,4 @@
-# 🐍 Project 17: Python AI Foundations & CrewAI Basics
+# 🐍 Python AI Foundations & CrewAI Basics
 
 > **Foundational Python and multi-agent concepts tailored for building AI testing agents, prompt orchestration, and autonomous quality workflows.**
 

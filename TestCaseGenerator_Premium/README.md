@@ -1,6 +1,6 @@
-# AI Test Crafter - Project 2
+# AI Test Crafter (Premium Test Case Generator)
 
-This project is a premium version of the AI Test Case Generator, built as a successor to `Project_01_LocalTestCaseGenerator`.
+This project is a premium version of the AI Test Case Generator, built as a featuring an advanced glassmorphism interface and modular FastAPI backend.
 
 ## 🚀 Enhancements
 - **Premium UI**: Modern glassmorphism design with animated transitions and a professional tech aesthetic.
