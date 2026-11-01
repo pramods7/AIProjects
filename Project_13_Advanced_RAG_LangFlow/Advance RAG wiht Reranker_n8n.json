@@ -1,0 +1,369 @@
+{
+  "name": "Advance RAG WIH Reranker",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Advance RAG Pipeline",
+        "formDescription": "Advance RAG Pipeline",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload PRD",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -416,
+        -224
+      ],
+      "id": "0b00ec76-b5e7-4122-a808-c0e0876af82e",
+      "name": "Ingest PRD",
+      "webhookId": "ae4eb4ae-11db-42e0-887b-cd544e1d244d"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "raglarge3072",
+          "mode": "list",
+          "cachedResultName": "raglarge3072"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        -224
+      ],
+      "id": "331696b0-38d4-45f8-8488-62ba27e0e240",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "fAJ9VG31t3IAgcsr",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "cb89600d-68ed-4b93-a442-1a5b836c6d55",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "d01309e2-6eaf-4c14-9f86-322932b45b2e",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "PvE0lyeUNlWZ7QBo",
+          "name": "Pramod key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkSize": 500,
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        160
+      ],
+      "id": "213d0657-b619-4e77-b3bf-8e186d574981",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        416,
+        64
+      ],
+      "id": "0052f543-17b2-4bae-82fc-25688288063a",
+      "name": "Embeddings Mistral Cloud",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "# Ingestion\n** Eat the Data",
+        "height": 640,
+        "width": 864
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -512,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "8f3ab048-0b27-4afb-90e0-153cb52f5412",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an AI assistant connected to a vector database.\n\nYour job is to answer user questions using the information retrieved from the Pinecone Vector Store.\n\nWorkflow you MUST follow:\n\n1. When a user asks a question, search the Pinecone vector database.\n2. Retrieve the relevant documents.\n3. Use the reranked results provided by the Cohere Reranker.\n4. Only use the TOP reranked documents as your knowledge source.\n\nRules:\n\n• Your answer must be based ONLY on the retrieved Pinecone documents after reranking.\n• Do NOT use prior knowledge.\n• Do NOT hallucinate information.\n• If the answer is not present in the retrieved context, respond with:\n  \n  \"I don't know based on the available data.\"\n\n• If multiple documents are retrieved, prioritize the highest reranked result.\n\nAnswer Style:\n\n• Be concise\n• Be factual\n• Use the retrieved context as the source\n• Do not mention Pinecone, embeddings, or reranking in the final answer\n\nContext from Pinecone Vector DB:\n\n\nUser Question from chat:\n{{ $json.chatInput }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        432
+      ],
+      "id": "8db71159-c050-40b2-9bb1-e502fee5099b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "text-embedding-3-large",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        784
+      ],
+      "id": "09ae49c2-7777-4b44-b3fa-316827d53a5d",
+      "name": "Embeddings OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "PvE0lyeUNlWZ7QBo",
+          "name": "Pramod key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "rerank-english-v3.0",
+        "topN": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        320,
+        832
+      ],
+      "id": "0f26c330-111e-4546-9086-265b798b0562",
+      "name": "Reranker Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "TaKxEEEloUOE4QQu",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        496
+      ],
+      "id": "8621ab3b-2362-454d-86f2-4fa3a25f3334",
+      "name": "input",
+      "webhookId": "3cb78049-372e-4b89-9e2d-9951a8053e41"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Retrieve data from the **vector database** for the knowledge base\n",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "raglarge3072",
+          "mode": "list",
+          "cachedResultName": "raglarge3072"
+        },
+        "topK": 10,
+        "useReranker": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        176,
+        624
+      ],
+      "id": "d4f7e434-f809-48af-a9c8-cdc6bdc2d2c7",
+      "name": "VectorDB",
+      "credentials": {
+        "pineconeApi": {
+          "id": "fAJ9VG31t3IAgcsr",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        640
+      ],
+      "id": "efb230cf-00b1-4e89-a1c2-309dc82f3e36",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BZphVryzZr6MG1h0",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ingest PRD": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Mistral Cloud": {
+      "ai_embedding": [
+        []
+      ]
+    },
+    "Embeddings OpenAI2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "VectorDB",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reranker Cohere": {
+      "ai_reranker": [
+        [
+          {
+            "node": "VectorDB",
+            "type": "ai_reranker",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VectorDB": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dfeb7079-aa72-49a4-9c34-3c2e8a0c19d4",
+  "meta": {
+    "instanceId": "c5b7d69aef09d65f6d843dbeb419620198dba9448e9bb3bd16f598faf54bf9f9"
+  },
+  "id": "LRkc3uCRkTm3K6zD",
+  "tags": []
+}

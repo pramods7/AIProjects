@@ -1,0 +1,61 @@
+# Describes the live chatbot under test. Point this at the bundled demo
+# chatbot (demo_chatbot/app.py) or at YOUR OWN live chatbot — the generic
+# clients in targets/ only need field names, not code changes.
+
+target:
+  name: "aria_demo"
+  base_url: "http://127.0.0.1:8301"     # demo_chatbot runs here by default
+
+  text:
+    endpoint: "/chat/text"
+    method: "POST"
+    request_field: "message"            # JSON key holding the user's message
+    history_field: "history"            # JSON key holding prior turns (list)
+    response_field: "reply"             # JSON key in the response holding the reply text
+
+  voice:
+    # mode: "native"   -> target itself accepts audio and returns a reply
+    #                     (upload to `endpoint` as multipart)
+    # mode: "pipeline"  -> target only understands text; the framework does
+    #                     STT before calling the text endpoint, and TTS
+    #                     after, so voice metrics can still be computed
+    mode: "native"
+    endpoint: "/chat/voice"
+    audio_field: "audio"                # multipart field name for the audio file
+    history_field: "history"            # multipart field name, JSON-encoded string
+    response_text_field: "reply"
+    response_transcript_field: "transcript"   # optional, null if target doesn't return one
+    response_audio_field: "audio_reply_b64"   # optional, base64 audio, null if none
+
+  video:
+    # mode: "native"   -> target accepts a video file directly
+    # mode: "pipeline" -> framework extracts frames + runs its own vision
+    #                     model, then calls the text endpoint with a
+    #                     frame-derived description as context
+    mode: "native"
+    endpoint: "/chat/video"
+    video_field: "video"
+    question_field: "question"
+    response_text_field: "reply"
+
+# Example block for pointing at a THIRD-PARTY live chatbot that only has a
+# text REST API (voice/video handled by the framework's own pipeline mode).
+# Uncomment and edit, then set TARGET_CONFIG to a file using this shape.
+#
+# target:
+#   name: "my_production_bot"
+#   base_url: "https://api.mycompany.com"
+#   text:
+#     endpoint: "/v1/chat"
+#     method: "POST"
+#     request_field: "prompt"
+#     history_field: "conversation"
+#     response_field: "answer"
+#   voice:
+#     mode: "pipeline"
+#     endpoint: "/v1/chat"          # reuses the text endpoint
+#     response_text_field: "answer"
+#   video:
+#     mode: "pipeline"
+#     endpoint: "/v1/chat"
+#     response_text_field: "answer"

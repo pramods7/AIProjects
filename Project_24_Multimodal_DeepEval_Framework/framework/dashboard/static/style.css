@@ -1,0 +1,24 @@
+* { box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; max-width: 1100px; margin: 30px auto; padding: 0 16px; color: #1a1a1a; }
+header { margin-bottom: 24px; }
+h1 { margin-bottom: 4px; }
+section { margin-bottom: 28px; }
+h2 { border-bottom: 2px solid #eee; padding-bottom: 6px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; background: #fff; }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.label { font-weight: 600; }
+.tag { font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #eee; text-transform: uppercase; }
+.tag-quality { background: #dbeafe; }
+.tag-safety { background: #fee2e2; }
+.tag-performance { background: #fef3c7; }
+.tag-infra { background: #e5e7eb; }
+button { padding: 6px 14px; border: none; border-radius: 6px; background: #111827; color: #fff; cursor: pointer; }
+button:hover { background: #374151; }
+.status { margin-top: 8px; font-size: 13px; color: #666; }
+.status.pass { color: #059669; font-weight: 600; }
+.status.fail { color: #dc2626; font-weight: 600; }
+.status.running { color: #d97706; }
+.log { margin-top: 8px; max-height: 160px; overflow: auto; background: #0b1020; color: #d1d5db; font-size: 11px; padding: 8px; border-radius: 6px; white-space: pre-wrap; }
+textarea, input[type=text], input[type=file] { width: 100%; margin-bottom: 6px; }
+.reply { margin-top: 8px; background: #f6f6f6; padding: 8px; border-radius: 6px; white-space: pre-wrap; font-size: 13px; }

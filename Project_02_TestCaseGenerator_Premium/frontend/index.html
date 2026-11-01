@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Test Case Generator | Premium Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.lucide.dev/lucide.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --accent: #22d3ee;
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: url('/static/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.15), transparent),
+                        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.15), transparent);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .input-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 3rem;
+            transition: transform 0.3s ease;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .input-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            color: white;
+            font-size: 1.1rem;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Results Area */
+        #result-container {
+            display: none;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .result-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .markdown-content {
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .markdown-content th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .markdown-content td {
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border);
+            vertical-align: top;
+        }
+
+        .markdown-content h3 {
+            margin: 2rem 0 1rem;
+            color: var(--accent);
+        }
+
+        /* Loading Spinner */
+        .loader {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 { font-size: 2.5rem; }
+            .container { padding: 2rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Test Crafter</h1>
+            <p>Generate high-quality manual test cases in seconds using local Agentic AI.</p>
+        </header>
+
+        <section class="input-card">
+            <div class="input-group">
+                <textarea id="userStory" placeholder="Paste your User Story here... e.g., 'As a user, I want to filter products by price...'"></textarea>
+            </div>
+            <button id="generateBtn" class="btn">
+                <i data-lucide="sparkles"></i>
+                <span>Generate Test Cases</span>
+                <div id="btnLoader" class="loader"></div>
+            </button>
+        </section>
+
+        <section id="result-container">
+            <div class="result-card">
+                <div class="result-header">
+                    <h2><i data-lucide="file-text" style="vertical-align: middle; margin-right: 8px;"></i> Generated Test Suite</h2>
+                    <button id="copyBtn" class="btn" style="width: auto; padding: 0.5rem 1rem; font-size: 0.9rem;">
+                        <i data-lucide="copy"></i> Copy Markdown
+                    </button>
+                </div>
+                <div id="output" class="markdown-content"></div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        &copy; 2026 AI Tester Blueprint | Powered by Ollama & Llama 3.2
+    </footer>
+
+    <script>
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        const generateBtn = document.getElementById('generateBtn');
+        const btnLoader = document.getElementById('btnLoader');
+        const btnText = generateBtn.querySelector('span');
+        const btnIcon = generateBtn.querySelector('i');
+        const userStory = document.getElementById('userStory');
+        const resultContainer = document.getElementById('result-container');
+        const output = document.getElementById('output');
+        const copyBtn = document.getElementById('copyBtn');
+
+        let lastResult = "";
+
+        generateBtn.addEventListener('click', async () => {
+            const story = userStory.value.trim();
+            if (!story) {
+                alert("Please enter a user story first.");
+                return;
+            }
+
+            // UI State: Loading
+            generateBtn.disabled = true;
+            btnLoader.style.display = 'block';
+            btnText.textContent = 'Analyzing & Generating...';
+            btnIcon.style.display = 'none';
+            resultContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_story: story })
+                });
+
+                if (!response.ok) throw new Error("Backend error or Ollama not running.");
+
+                const data = await response.json();
+                lastResult = data.test_cases;
+                
+                // Render Markdown
+                output.innerHTML = marked.parse(lastResult);
+                resultContainer.style.display = 'block';
+                
+                // Re-init icons if any added in output (though unlikely)
+                lucide.createIcons();
+
+                // Scroll to result
+                resultContainer.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                alert("Error: " + error.message);
+                console.error(error);
+            } finally {
+                // UI State: Reset
+                generateBtn.disabled = false;
+                btnLoader.style.display = 'none';
+                btnText.textContent = 'Generate Test Cases';
+                btnIcon.style.display = 'inline-block';
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(lastResult).then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i data-lucide="check"></i> Copied!';
+                lucide.createIcons();
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    lucide.createIcons();
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

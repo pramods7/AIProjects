@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise QA Engine — Local Test Case Generator</title>
+  <meta name="description" content="Enterprise QA Test Design Engine powered by local Ollama AI. Generate production-grade test scenarios, test cases, traceability matrices, and automation candidates from PRD, BRD, Jira tickets, and UI assets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- File parsing libraries (Zero-Backend, all run in-browser) -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════════════════════════════════ TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">🧪</div>
+      <h1>Enterprise <span>QA Engine</span></h1>
+      <span style="font-size:0.72rem;color:var(--clr-text-muted);margin-left:4px;">v2.0</span>
+    </div>
+    <div class="topbar-controls">
+      <div class="url-input-wrap" style="display: flex; align-items: center; gap: 6px; background: var(--clr-bg-card); border: 1px solid var(--clr-border); padding: 3px 8px; border-radius: var(--rad-sm);">
+        <span style="font-size: 0.68rem; color: var(--clr-text-muted); font-weight: 600; text-transform: uppercase;">API:</span>
+        <input type="text" id="api-url-input" value="http://127.0.0.1:11434" style="background: transparent; border: none; color: var(--clr-text-primary); font-family: var(--font-mono); font-size: 0.72rem; width: 150px; outline: none;" onchange="updateApiUrl(this.value)" title="Configure Ollama API host address" />
+      </div>
+      <div class="model-badge">🦙 <span id="model-name">llama3.2</span></div>
+      <div class="status-pill" id="status-pill">
+        <div class="dot"></div>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════ SIDEBAR -->
+  <nav class="sidebar">
+    <span class="sidebar-label">Navigation</span>
+
+    <button class="sidebar-btn active" id="nav-generator" onclick="showView('generator')">
+      <span class="sicon">⚡</span> Generator
+    </button>
+    <button class="sidebar-btn" id="nav-dashboard" onclick="showView('dashboard')">
+      <span class="sicon">📊</span> Dashboard
+      <span class="sidebar-badge" id="sb-total">0</span>
+    </button>
+
+    <div class="sidebar-divider"></div>
+    <span class="sidebar-label">Output</span>
+
+    <button class="sidebar-btn" onclick="switchTab('scenarios')">
+      <span class="sicon">🗂️</span> Scenarios
+      <span class="sidebar-badge" id="sb-scenarios">0</span>
+    </button>
+    <button class="sidebar-btn" onclick="switchTab('testcases')">
+      <span class="sicon">✅</span> Test Cases
+      <span class="sidebar-badge" id="sb-testcases">0</span>
+    </button>
+    <button class="sidebar-btn" onclick="switchTab('traceability')">
+      <span class="sicon">🔗</span> Traceability
+    </button>
+    <button class="sidebar-btn" onclick="switchTab('risks')">
+      <span class="sicon">⚠️</span> Risk Areas
+      <span class="sidebar-badge" id="sb-risks">0</span>
+    </button>
+    <button class="sidebar-btn" onclick="switchTab('automation')">
+      <span class="sicon">🤖</span> Automation
+      <span class="sidebar-badge" id="sb-auto">0</span>
+    </button>
+
+    <div class="sidebar-divider"></div>
+    <span class="sidebar-label">Export</span>
+
+    <button class="sidebar-btn" onclick="exportCSV()"><span class="sicon">📄</span> Export CSV</button>
+    <button class="sidebar-btn" onclick="exportJSON()"><span class="sicon">🟡</span> Export JSON</button>
+    <button class="sidebar-btn" onclick="exportHTML()"><span class="sicon">🌐</span> Export HTML</button>
+    <button class="sidebar-btn" onclick="exportTXT()"><span class="sicon">📝</span> Export TXT</button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════ WORKSPACE -->
+  <div class="workspace">
+
+    <!-- ────────── LEFT PANEL ────────── -->
+    <aside class="left-panel">
+
+      <!-- Upload Zone -->
+      <div class="upload-zone" id="upload-zone"
+           ondragover="handleDragOver(event)"
+           ondragleave="handleDragLeave(event)"
+           ondrop="handleDrop(event)">
+        <span class="upload-icon">📂</span>
+        <h3>Drop files here</h3>
+        <p>Or click to browse — supports 20+ types</p>
+        <input type="file" id="file-input" multiple
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.json,.xml,.png,.jpg,.jpeg,.webp,.gif,.mp4,.mov,.avi,.mkv,.zip,.log"
+          onchange="handleFileSelect(event)" />
+      </div>
+
+      <!-- Supported types chips -->
+      <div class="file-types-bar">
+        <span class="ft-chip">.pdf</span><span class="ft-chip">.docx</span><span class="ft-chip">.xlsx</span>
+        <span class="ft-chip">.csv</span><span class="ft-chip">.json</span><span class="ft-chip">.xml</span>
+        <span class="ft-chip">.txt</span><span class="ft-chip">.log</span><span class="ft-chip">.png</span>
+        <span class="ft-chip">.mp4</span><span class="ft-chip">.zip</span><span class="ft-chip">+more</span>
+      </div>
+
+      <!-- File List -->
+      <div class="file-list" id="file-list"></div>
+
+      <!-- Context Input -->
+      <div class="context-section">
+        <label for="context-input">Additional Context / Notes</label>
+        <textarea class="context-input" id="context-input"
+          placeholder="Describe the feature, Jira ticket ID, testing scope, or any special instructions…"
+          rows="4"></textarea>
+      </div>
+
+      <!-- Framework Selector -->
+      <div class="framework-row">
+        <select class="framework-select" id="framework-select">
+          <option value="">🎯 Auto-detect Framework</option>
+          <option value="selenium-java-testng">Selenium + Java + TestNG</option>
+          <option value="selenium-java-junit">Selenium + Java + JUnit</option>
+          <option value="selenium-python-pytest">Selenium + Python + pytest</option>
+          <option value="restassured">REST Assured (API)</option>
+          <option value="postman">Postman / Newman</option>
+          <option value="cypress">Cypress</option>
+          <option value="playwright">Playwright</option>
+          <option value="manual">Manual Test Cases</option>
+          <option value="salesforce">Salesforce CRM</option>
+        </select>
+      </div>
+
+      <!-- Generate Button -->
+      <button class="generate-btn" id="generate-btn" onclick="generate()">
+        <div class="spinner"></div>
+        <span class="btn-text">⚡ Generate Test Assets</span>
+      </button>
+
+      <!-- Chat History -->
+      <div class="chat-history" id="chat-history"></div>
+
+    </aside>
+
+    <!-- ────────── RIGHT PANEL ────────── -->
+    <section class="right-panel">
+
+      <!-- Output Toolbar -->
+      <div class="output-toolbar">
+        <div class="output-tabs">
+          <button class="out-tab active" id="tab-overview"    onclick="switchTab('overview')">📋 Overview</button>
+          <button class="out-tab"        id="tab-scenarios"   onclick="switchTab('scenarios')">🗂️ Scenarios <span class="tab-badge" id="tb-scenarios">0</span></button>
+          <button class="out-tab"        id="tab-testcases"   onclick="switchTab('testcases')">✅ Test Cases <span class="tab-badge" id="tb-testcases">0</span></button>
+          <button class="out-tab"        id="tab-traceability" onclick="switchTab('traceability')">🔗 Traceability</button>
+          <button class="out-tab"        id="tab-risks"       onclick="switchTab('risks')">⚠️ Risks <span class="tab-badge" id="tb-risks">0</span></button>
+          <button class="out-tab"        id="tab-automation"  onclick="switchTab('automation')">🤖 Automation <span class="tab-badge" id="tb-auto">0</span></button>
+        </div>
+        <div class="toolbar-actions">
+          <button class="icon-btn export-csv"  onclick="exportCSV()">📄 CSV</button>
+          <button class="icon-btn export-json" onclick="exportJSON()">🟡 JSON</button>
+          <button class="icon-btn export-html" onclick="exportHTML()">🌐 HTML</button>
+          <button class="icon-btn export-txt"  onclick="exportTXT()">📝 TXT</button>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar-wrap">
+        <input type="search" class="search-input" id="search-input"
+          placeholder="🔍  Search scenarios, test cases, requirements…"
+          oninput="filterContent(this.value)" />
+        <select class="filter-select" id="priority-filter" onchange="filterContent(document.getElementById('search-input').value)">
+          <option value="">All Priorities</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select class="filter-select" id="auto-filter" onchange="filterContent(document.getElementById('search-input').value)">
+          <option value="">All Types</option>
+          <option value="yes">Automatable</option>
+          <option value="no">Manual Only</option>
+        </select>
+      </div>
+
+      <!-- Output Content -->
+      <div class="output-content" id="output-content">
+
+        <!-- ── EMPTY / WELCOME STATE ── -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🧪</div>
+          <h2>Enterprise QA Engine</h2>
+          <p>Upload your PRD, BRD, Jira tickets, UI screenshots, or any requirement document and generate production-grade test assets in seconds.</p>
+          <div class="empty-steps">
+            <div class="step-card">
+              <div class="step-num">1</div>
+              <h4>Upload Files</h4>
+              <p>Drop PDFs, images, text files, JSON, XML and more</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">2</div>
+              <h4>Add Context</h4>
+              <p>Describe scope, framework preference, or special notes</p>
+            </div>
+            <div class="step-card">
+              <div class="step-num">3</div>
+              <h4>Generate</h4>
+              <p>AI analyzes inputs and produces traceable test assets</p>
+            </div>
+          </div>
+          <p style="font-size:0.72rem;color:var(--clr-text-muted);">
+            Powered by <strong style="color:var(--clr-accent)">Ollama llama3.2</strong> running locally at localhost:11434
+          </p>
+        </div>
+
+        <!-- ── GENERATING STATE ── -->
+        <div class="generating-overlay" id="generating-state" style="display:none;">
+          <div class="gen-spinner-ring"></div>
+          <div class="gen-status" id="gen-status">Analyzing inputs…</div>
+          <div class="gen-step"  id="gen-step">Applying Anti-Hallucination protocol</div>
+        </div>
+
+        <!-- ── OVERVIEW TAB ── -->
+        <div class="output-panel" id="panel-overview">
+          <div class="stats-grid" id="stats-grid"></div>
+          <div id="info-blocks"></div>
+          <div id="validation-result"></div>
+        </div>
+
+        <!-- ── SCENARIOS TAB ── -->
+        <div class="output-panel" id="panel-scenarios">
+          <div class="section-head">
+            <h2>Generated Test Scenarios</h2>
+            <span class="count-pill" id="scenarios-count">0</span>
+          </div>
+          <div id="scenarios-list"></div>
+        </div>
+
+        <!-- ── TEST CASES TAB ── -->
+        <div class="output-panel" id="panel-testcases">
+          <div class="section-head">
+            <h2>Generated Test Cases</h2>
+            <span class="count-pill" id="testcases-count">0</span>
+          </div>
+          <div id="testcases-list"></div>
+        </div>
+
+        <!-- ── TRACEABILITY TAB ── -->
+        <div class="output-panel" id="panel-traceability">
+          <div class="section-head">
+            <h2>Requirement Traceability Matrix</h2>
+          </div>
+          <div class="trace-table-wrap">
+            <table class="trace-table" id="trace-table">
+              <thead>
+                <tr>
+                  <th>Requirement Ref</th>
+                  <th>Source</th>
+                  <th>Scenario ID</th>
+                  <th>Test Case IDs</th>
+                  <th>Priority</th>
+                  <th>Coverage</th>
+                  <th>Automation</th>
+                </tr>
+              </thead>
+              <tbody id="trace-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── RISKS TAB ── -->
+        <div class="output-panel" id="panel-risks">
+          <div class="section-head">
+            <h2>Risk Areas</h2>
+            <span class="count-pill" id="risks-count">0</span>
+          </div>
+          <div id="risks-list"></div>
+        </div>
+
+        <!-- ── AUTOMATION TAB ── -->
+        <div class="output-panel" id="panel-automation">
+          <div class="section-head">
+            <h2>Automation Candidates</h2>
+            <span class="count-pill" id="auto-count">0</span>
+          </div>
+          <div id="auto-list"></div>
+        </div>
+
+      </div><!-- /output-content -->
+    </section><!-- /right-panel -->
+
+  </div><!-- /workspace -->
+</div><!-- /app-shell -->
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

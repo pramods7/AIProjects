@@ -1,0 +1,28 @@
+# Environments & virtualenvs
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.deepeval/
+
+# Node dependencies & build
+node_modules/
+dist/
+.vite/
+
+# Secrets & Environment variables
+.env
+*.env.local
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Aria — Multimodal Demo Chatbot</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; }
+  section { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+  h2 { margin-top: 0; font-size: 16px; }
+  textarea, input[type=text] { width: 100%; box-sizing: border-box; }
+  button { margin-top: 8px; padding: 6px 14px; cursor: pointer; }
+  .reply { background: #f6f6f6; padding: 10px; border-radius: 6px; margin-top: 10px; white-space: pre-wrap; }
+  code { background: #eee; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+  <h1>Aria — Multimodal Demo Chatbot</h1>
+  <p>Backend must be running at <code>http://localhost:8301</code>.</p>
+
+  <section>
+    <h2>Text</h2>
+    <textarea id="textMsg" rows="2" placeholder="Ask something..."></textarea>
+    <button onclick="sendText()">Send</button>
+    <div class="reply" id="textReply"></div>
+  </section>
+
+  <section>
+    <h2>Voice</h2>
+    <button id="recBtn" onclick="toggleRecording()">Start Recording</button>
+    <div class="reply" id="voiceReply"></div>
+    <audio id="voicePlayback" controls style="width:100%; margin-top:8px; display:none;"></audio>
+  </section>
+
+  <section>
+    <h2>Video</h2>
+    <input type="file" id="videoFile" accept="video/*" />
+    <input type="text" id="videoQuestion" placeholder="What's your question about this video?" />
+    <button onclick="sendVideo()">Send</button>
+    <div class="reply" id="videoReply"></div>
+  </section>
+
+<script>
+const BASE = "http://127.0.0.1:8301";
+
+async function sendText() {
+  const message = document.getElementById("textMsg").value;
+  const r = await fetch(`${BASE}/chat/text`, {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({message, history: []})
+  });
+  const d = await r.json();
+  document.getElementById("textReply").innerText = d.reply;
+}
+
+let mediaRecorder, chunks = [];
+async function toggleRecording() {
+  const btn = document.getElementById("recBtn");
+  if (btn.innerText === "Start Recording") {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = sendVoice;
+    mediaRecorder.start();
+    btn.innerText = "Stop Recording";
+  } else {
+    mediaRecorder.stop();
+    btn.innerText = "Start Recording";
+  }
+}
+
+async function sendVoice() {
+  const blob = new Blob(chunks, {type: "audio/webm"});
+  const fd = new FormData();
+  fd.append("audio", blob, "voice.webm");
+  fd.append("history", "[]");
+  const r = await fetch(`${BASE}/chat/voice`, {method: "POST", body: fd});
+  const d = await r.json();
+  document.getElementById("voiceReply").innerText = `Transcript: ${d.transcript}\n\nReply: ${d.reply}`;
+  if (d.audio_reply_b64) {
+    const audioEl = document.getElementById("voicePlayback");
+    audioEl.src = `data:audio/mp3;base64,${d.audio_reply_b64}`;
+    audioEl.style.display = "block";
+  }
+}
+
+async function sendVideo() {
+  const file = document.getElementById("videoFile").files[0];
+  const question = document.getElementById("videoQuestion").value;
+  if (!file) return alert("Choose a video file first");
+  const fd = new FormData();
+  fd.append("video", file);
+  fd.append("question", question);
+  const r = await fetch(`${BASE}/chat/video`, {method: "POST", body: fd});
+  const d = await r.json();
+  document.getElementById("videoReply").innerText = d.reply;
+}
+</script>
+</body>
+</html>

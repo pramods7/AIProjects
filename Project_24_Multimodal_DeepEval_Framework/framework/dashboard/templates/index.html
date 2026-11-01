@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Multimodal DeepEval Dashboard</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Multimodal DeepEval Dashboard</h1>
+  <p>Target: <strong>{{ target_name }}</strong> — <code>{{ base_url }}</code></p>
+</header>
+
+{% for modality, cards in cards_by_modality.items() %}
+<section>
+  <h2>{{ modality|capitalize }}</h2>
+  <div class="grid">
+    {% for card in cards %}
+    <div class="card" id="card-{{ card.id }}">
+      <div class="card-head">
+        <span class="label">{{ card.label }}</span>
+        <span class="tag tag-{{ card.type }}">{{ card.type }}</span>
+      </div>
+      <button onclick="runCard('{{ card.id }}')">Run</button>
+      <div class="status" id="status-{{ card.id }}">not run</div>
+      <pre class="log" id="log-{{ card.id }}"></pre>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<section>
+  <h2>Live Tester (manual, bypasses DeepEval)</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-head"><span class="label">Text</span></div>
+      <textarea id="liveTextMsg" rows="2" placeholder="Ask something..."></textarea>
+      <button onclick="liveText()">Send</button>
+      <div class="reply" id="liveTextReply"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="label">Voice</span></div>
+      <input type="file" id="liveAudioFile" accept="audio/*" />
+      <button onclick="liveVoice()">Send</button>
+      <div class="reply" id="liveVoiceReply"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><span class="label">Video</span></div>
+      <input type="file" id="liveVideoFile" accept="video/*" />
+      <input type="text" id="liveVideoQuestion" placeholder="Question about the video" />
+      <button onclick="liveVideo()">Send</button>
+      <div class="reply" id="liveVideoReply"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+async function runCard(id) {
+  const statusEl = document.getElementById(`status-${id}`);
+  const logEl = document.getElementById(`log-${id}`);
+  statusEl.innerText = "running...";
+  statusEl.className = "status running";
+  const r = await fetch(`/api/run/${id}`, {method: "POST"});
+  const d = await r.json();
+  statusEl.innerText = d.passed ? `✅ pass (${d.elapsed_sec}s)` : `❌ fail (${d.elapsed_sec}s)`;
+  statusEl.className = "status " + (d.passed ? "pass" : "fail");
+  logEl.innerText = (d.stdout || "") + "\n" + (d.stderr || "");
+}
+
+async function liveText() {
+  const message = document.getElementById("liveTextMsg").value;
+  const r = await fetch("/api/live/text", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({message})});
+  const d = await r.json();
+  document.getElementById("liveTextReply").innerText = d.reply || JSON.stringify(d);
+}
+
+async function liveVoice() {
+  const file = document.getElementById("liveAudioFile").files[0];
+  if (!file) return alert("Choose an audio file");
+  const fd = new FormData(); fd.append("audio", file);
+  const r = await fetch("/api/live/voice", {method: "POST", body: fd});
+  const d = await r.json();
+  document.getElementById("liveVoiceReply").innerText = `Transcript: ${d.transcript}\nReply: ${d.reply}\nLatency: ${d.latency_sec}s`;
+}
+
+async function liveVideo() {
+  const file = document.getElementById("liveVideoFile").files[0];
+  const question = document.getElementById("liveVideoQuestion").value;
+  if (!file) return alert("Choose a video file");
+  const fd = new FormData(); fd.append("video", file); fd.append("question", question);
+  const r = await fetch("/api/live/video", {method: "POST", body: fd});
+  const d = await r.json();
+  document.getElementById("liveVideoReply").innerText = d.reply || JSON.stringify(d);
+}
+</script>
+</body>
+</html>
